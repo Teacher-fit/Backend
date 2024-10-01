@@ -29,7 +29,8 @@ class ResponseData(BaseModel):
 
 
 # 모델 파라미터 로드 함수
-def load_model_parameters(file_path):
+def load_model_parameters(file_name):
+    file_path = os.path.join(os.path.dirname(__file__), file_name)
     with open(file_path, "r", encoding="utf-8") as file:
         parameters = json.load(file)
     return parameters
