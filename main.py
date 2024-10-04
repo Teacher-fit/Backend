@@ -79,7 +79,7 @@ def recommend_learning_activities_in_korean(
 [대상 학년]
 
 ## 단원
-[단원명]
+[단원명 : {textbook_content}에서 단원 명을 찾아 작성해주세요.]
 
 ## 준비물
 [준비물이 필요한 경우 제시해주세요.]
