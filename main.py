@@ -54,7 +54,7 @@ def load_model_parameters(file_name):
 def load_textbook_content_from_input(
     main_chapter, sub_chapter, small_chapter, base_dir="./data/textbook/"
 ):
-    file_name = f"{main_chapter}_{sub_chapter}_{small_chapter}.txt"
+    file_name = f"{main_chapter+1}_{sub_chapter+1}_{small_chapter+1}.txt"
     file_path = os.path.join(base_dir, file_name)
 
     # 파일이 존재하는지 확인하고 내용을 읽어오기
@@ -114,6 +114,7 @@ def recommend_learning_activities_in_korean(
 
 ## 단계별 학습활동
 아래 표에 각 단계별로 구체적인 학습활동, 활동의 목적, 진행 방법, 학생들의 역할, 그리고 수업형태를 상세히 작성해 주세요. 추천한 에듀테크 제품을 활동 중 적절하게 사용할 수 있도록 창의적인 답변을 주세요.
+학습 활동은 도입, 전개, 마무리 각각 **200자 분량**으로 교사가 따라할 수 있도록 구체적인 활동을 제시해줘.
 
 | **단계** | **학습활동** | **수업형태** |
 |---|---|---|
