@@ -93,7 +93,8 @@ def recommend_learning_activities_in_korean(
 [대상 학년]
 
 ## 단원
-[대단원 {data.main_chapter}, 중단원 {data.sub_chapter}, 소단원 {data.small_chapter}, {textbook_content}에서 단원 번호와 단원명을 찾아 작성해주세요. ex) 대단원 2, 중단원 1, 소단원 3 : 우리 안에 있는 다문화의 모습은 무엇인가?]
+대단원 {data.main_chapter+1}, 중단원 {data.sub_chapter+1}, {textbook_content}의 첫번째 단원명.
+[ex) 대단원 2, 중단원 1, 소단원 3 : 우리 안에 있는 다문화의 모습은 무엇인가?]
 
 ## 준비물
 [준비물이 필요한 경우 제시해주세요.]
