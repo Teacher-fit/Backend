@@ -61,7 +61,7 @@ def load_textbook_content_from_input(
             content = file.read()
         return content
     else:
-        return f"파일을 찾을 수 없습니다: {file_path}"
+        return f"error"
 
 
 # GPT API를 사용하여 학습 활동을 추천하는 함수
@@ -91,7 +91,7 @@ def recommend_learning_activities_in_korean(
 [대상 학년]
 
 ## 단원
-[단원명 : {textbook_content}에서 단원 명을 찾아 작성해주세요.]
+[단원명 : {textbook_content}에서 단원 명이 첫번째에 위치합니다.]
 
 ## 준비물
 [준비물이 필요한 경우 제시해주세요.]
@@ -160,6 +160,10 @@ async def create_response(data: RequestData = Body(...)):
     textbook_content = load_textbook_content_from_input(
         data.main_chapter, data.sub_chapter, data.small_chapter
     )
+
+    if textbook_content == "error":
+        response_data = {"content": "error"}
+        return response_data
 
     # GPT API를 호출하여 학습 활동 추천
     activities = recommend_learning_activities_in_korean(
