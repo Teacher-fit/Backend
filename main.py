@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Body
+from fastapi import FastAPI, Body, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 import openai
@@ -6,9 +6,12 @@ import os
 import json
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
+import logging
 
 app = FastAPI()
 
+# 로깅 설정
+logging.basicConfig(level=logging.INFO)
 
 # CORS 설정
 app.add_middleware(
@@ -18,7 +21,6 @@ app.add_middleware(
     allow_methods=["*"],  # 모든 HTTP 메서드 허용
     allow_headers=["*"],  # 모든 헤더 허용
 )
-
 
 # .env 파일에서 API 키 로드
 load_dotenv()
@@ -61,7 +63,7 @@ def load_textbook_content_from_input(
             content = file.read()
         return content
     else:
-        return f"파일을 찾을 수 없습니다: {file_path}"
+        raise FileNotFoundError(f"File {file_name} not found at {base_dir}")
 
 
 # GPT API를 사용하여 학습 활동을 추천하는 함수
@@ -91,7 +93,7 @@ def recommend_learning_activities_in_korean(
 [대상 학년]
 
 ## 단원
-[단원명 : {textbook_content}에서 단원 명을 찾아 작성해주세요.]
+[대단원 {data.main_chapter}, 중단원 {data.sub_chapter}, 소단원 {data.small_chapter}, {textbook_content}에서 단원 번호와 단원명을 찾아 작성해주세요. ex) 대단원 2, 중단원 1, 소단원 3 : 우리 안에 있는 다문화의 모습은 무엇인가?]
 
 ## 준비물
 [준비물이 필요한 경우 제시해주세요.]
@@ -100,24 +102,35 @@ def recommend_learning_activities_in_korean(
 [수업 방식]
 
 ## 에듀테크 제품
-[제품명 및 추천 이유/활용 방안]
+
+[제품명: 추천 에듀테크 도구(앱, 프로그램 등) 및 해당 도구를 추천하는 이유와 구체적 활용 방안]
+
+## 교사들을 위한 에듀테크 도구 사용법
+
+- **사용법**: 교사들이 에듀테크 도구를 수업 중 어떻게 사용할 수 있는지 간단하고 명료하게 설명해 주세요. 설치 방법, 기본 기능, 수업 중 적용 방법 등을 포함하여 교사들이 도구를 효과적으로 활용할 수 있도록 안내해 주세요.
 
 ## 수업 목표
-- 목표
+- 학습 목표: 이 수업을 통해 학생들이 달성해야 할 구체적인 목표
 
 ## 단계별 학습활동
 아래 표에 각 단계별로 구체적인 학습활동, 활동의 목적, 진행 방법, 학생들의 역할, 그리고 수업형태를 상세히 작성해 주세요. 추천한 에듀테크 제품을 활동 중 적절하게 사용할 수 있도록 창의적인 답변을 주세요.
 
 | **단계** | **학습활동** | **수업형태** |
 |---|---|---|
-| 도입 | [예: 학생들의 관심을 끌기 위한 동기 부여 활동] | [수업형태] |
-| 전개1 | [예: 에듀테크 도구를 활용한 핵심 개념 학습] | [수업형태] |
-| 전개2 | [예: 그룹 활동을 통한 문제 해결] | [수업형태] |
-| 마무리 | [예: 학습 내용 정리 및 피드백] | [수업형태] |
+| 도입 | [ex. 에듀테크 도구를 활용하여 학생들의 흥미를 유도하고 수업의 배경 지식을 제공합니다.] | [수업형태] |
+| 전개1 | [ex. 에듀테크 도구를 활용하여 핵심 개념을 학습하고, 직관적인 시각 자료를 통해 이해를 돕습니다.] | [수업형태] |
+| 전개2 | [ex. 그룹 활동을 통해 문제를 해결하고, 학습 내용을 실제 생활에 적용할 수 있는 상황을 제공합니다.] | [수업형태] |
+| 마무리 | [ex. 학생들이 학습 내용을 요약하고, 에듀테크 도구를 통해 피드백을 받습니다.] | [수업형태] |
 
 
 ## 활용효과
 - 효과
+
+## 지도상 유의사항
+ex) 
+- **기술 격차**: 학생들이 각기 다른 디지털 리터러시 수준을 가지고 있을 수 있으므로, 모든 학생들이 도구를 사용할 수 있도록 초기 단계에서 충분한 지원을 제공하세요.
+- **학생 참여도**: 에듀테크 도구를 사용하는 활동은 흥미를 끌 수 있지만, 도구 사용에 집중하여 학습 목표를 소홀히 하지 않도록 유도하는 것이 중요합니다.
+- **윤리적 문제**: 디지털 도구를 사용할 때, 개인정보 보호와 온라인에서의 윤리적인 행동에 대해 명확히 가르쳐야 합니다.
 """
     try:
         # ChatCompletion 생성 요청
@@ -126,7 +139,7 @@ def recommend_learning_activities_in_korean(
             messages=[
                 {
                     "role": "system",
-                    "content": "당신은 중학생 대상 교육 활동 지도가이자 에듀테크 컨텐츠 추천 전문가입니다.",
+                    "content": "당신은 중학생 대상 교수 설계 전문가이다. 요청을 바탕으로 교수학습 지도안을 설계해라.",
                 },
                 {"role": "user", "content": prompt},
             ],
@@ -143,30 +156,29 @@ def recommend_learning_activities_in_korean(
             request_timeout=model_parameters[
                 "request_timeout"
             ],  # 요청 시간 제한 (없으면 None)
-            # logit_bias=model_parameters["logit_bias"]  # 필요 시 사용
         )
         return response.choices[0].message["content"].strip()
     except Exception as e:
+        logging.error(f"GPT API 호출 중 에러 발생: {e}")
         return f"Error: {str(e)}"
 
 
 # 데이터 받아서 GPT API를 호출하고 응답을 반환
 @app.post("/edu-recommend", response_model=ResponseData)
 async def create_response(data: RequestData = Body(...)):
-    # 모델 파라미터 로드
-    model_parameters = load_model_parameters("model.json")
-
-    # 교과서 내용 로드
-    textbook_content = load_textbook_content_from_input(
-        data.main_chapter, data.sub_chapter, data.small_chapter
-    )
-
-    # GPT API를 호출하여 학습 활동 추천
-    activities = recommend_learning_activities_in_korean(
-        textbook_content, data, model_parameters
-    )
-
-    # dict 형식으로 반환
-    response_data = {"content": activities}
-
-    return response_data
+    try:
+        model_parameters = load_model_parameters("model.json")
+        textbook_content = load_textbook_content_from_input(
+            data.main_chapter, data.sub_chapter, data.small_chapter
+        )
+        activities = recommend_learning_activities_in_korean(
+            textbook_content, data, model_parameters
+        )
+        response_data = {"content": activities}
+        return response_data
+    except FileNotFoundError as e:
+        logging.error(f"파일 로드 에러: {e}")
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        logging.error(f"예기치 못한 에러 발생: {e}")
+        raise HTTPException(status_code=500, detail="An unexpected error occurred")
